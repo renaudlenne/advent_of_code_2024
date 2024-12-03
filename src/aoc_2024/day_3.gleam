@@ -12,24 +12,23 @@ fn do_mul(match: regexp.Match) {
 
 pub fn pt_1(input: String) {
   let assert Ok(re) = regexp.from_string("mul\\((\\d+),(\\d+)\\)")
-  let assert Ok(res) = regexp.scan(re, input)
-  |> list.map(do_mul)
-  |> list.reduce(fn (acc, val) { acc + val })
-  res
+  regexp.scan(re, input)
+  |> list.fold(0, fn (acc, match) {
+    acc + do_mul(match)
+  })
 }
 
 pub fn pt_2(input: String) {
-  let assert Ok(re) = regexp.from_string("don't\\(\\)|do\\(\\)|mul\\((\\d+),(\\d+)\\)")
-  let #(_, processed_list) = regexp.scan(re, input)
-  |> list.map_fold(True, fn(enabled, match) {
+  let assert Ok(re) = regexp.from_string("do(?:n't)?\\(\\)|mul\\((\\d+),(\\d+)\\)")
+  let #(_, res) = regexp.scan(re, input)
+  |> list.fold(#(True, 0), fn(acc_tuple, match) {
+    let #(enabled, acc) = acc_tuple
     case match.content {
-      "don't()" -> #(False, 0)
-      "do()" -> #(True, 0)
-      _ if enabled -> #(enabled, do_mul(match))
-      _ -> #(enabled, 0)
+      "don't()" -> #(False, acc)
+      "do()" -> #(True, acc)
+      _ if enabled -> #(enabled, acc + do_mul(match))
+      _ -> #(enabled, acc)
     }
   })
-  let assert Ok(res) = processed_list
-  |> list.reduce(fn (acc, val) { acc + val })
   res
 }
