@@ -19,3 +19,4 @@ gladvent = { path = "../gladvent" }
 envoy = ">= 1.0.2 and < 2.0.0"
 gleam_regexp = ">= 1.0.0 and < 2.0.0"
 gleamy_bench = ">= 0.5.0 and < 1.0.0"
+gleam_yielder = ">= 1.1.0 and < 2.0.0"
