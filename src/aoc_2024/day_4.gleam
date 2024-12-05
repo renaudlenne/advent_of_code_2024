@@ -91,18 +91,14 @@ pub fn pt_2(input: Matrix) {
         #(pos.0 - 1, pos.1 - 1)
       })
     {
-      1 ->
-        case
-          find(matrix, #(x_pos.0 + 1, x_pos.1 - 1), mas, fn(pos) {
-            #(pos.0 - 1, pos.1 + 1)
-          })
-          + find(matrix, #(x_pos.0 - 1, x_pos.1 + 1), mas, fn(pos) {
-            #(pos.0 + 1, pos.1 - 1)
-          })
-        {
-          1 -> 1
-          _ -> 0
-        }
+      1 -> {
+        find(matrix, #(x_pos.0 + 1, x_pos.1 - 1), mas, fn(pos) {
+          #(pos.0 - 1, pos.1 + 1)
+        })
+        + find(matrix, #(x_pos.0 - 1, x_pos.1 + 1), mas, fn(pos) {
+          #(pos.0 + 1, pos.1 - 1)
+        })
+      }
       _ -> 0
     }
   })
