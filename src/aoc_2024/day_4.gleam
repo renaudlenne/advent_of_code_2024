@@ -1,41 +1,14 @@
-import gleam/list
 import gleam/string
 import gleam/yielder
-
-pub fn parse(input: String) {
-  string.split(input, "\n")
-  |> list.map(fn(line) {
-    string.to_graphemes(line)
-    |> yielder.from_list()
-  })
-  |> yielder.from_list()
-}
-
-type Matrix =
-  yielder.Yielder(yielder.Yielder(String))
-
-type Coord =
-  #(Int, Int)
-
-fn get_at_coord(matrix: Matrix, pos: Coord) {
-  case pos {
-    #(a, b) if a < 0 || b < 0 -> Error(Nil)
-    _ -> {
-      case yielder.at(matrix, pos.1) {
-        Ok(line) -> yielder.at(line, pos.0)
-        _ -> Error(Nil)
-      }
-    }
-  }
-}
+import utils/matrix
 
 fn find(
-  matrix: Matrix,
-  pos: Coord,
+  matrix: matrix.Matrix,
+  pos: matrix.Coord,
   to_find: List(String),
   next_pos: fn(#(Int, Int)) -> #(Int, Int),
 ) {
-  case get_at_coord(matrix, pos) {
+  case matrix.get_at_coord(matrix, pos) {
     Ok(current) -> {
       case to_find {
         [a] if a == current -> 1
@@ -48,7 +21,7 @@ fn find(
   }
 }
 
-fn count_from(matrix: Matrix, to_find: List(String), starting_pos: Coord) {
+fn count_from(matrix: matrix.Matrix, to_find: List(String), starting_pos: matrix.Coord) {
   find(matrix, starting_pos, to_find, fn(pos) { #(pos.0, pos.1 - 1) })
   + find(matrix, starting_pos, to_find, fn(pos) { #(pos.0 + 1, pos.1 - 1) })
   + find(matrix, starting_pos, to_find, fn(pos) { #(pos.0 + 1, pos.1) })
@@ -59,14 +32,14 @@ fn count_from(matrix: Matrix, to_find: List(String), starting_pos: Coord) {
   + find(matrix, starting_pos, to_find, fn(pos) { #(pos.0 - 1, pos.1 - 1) })
 }
 
-fn dimensions(matrix: Matrix) {
+fn dimensions(matrix: matrix.Matrix) {
   let nb_lines = yielder.length(matrix)
   let assert Ok(first_line) = yielder.at(matrix, 0)
   let nb_cols = yielder.length(first_line)
   #(nb_cols, nb_lines)
 }
 
-fn fold_over_matrix(matrix: Matrix, count_fn: fn(Matrix, #(Int, Int)) -> Int) {
+fn fold_over_matrix(matrix: matrix.Matrix, count_fn: fn(matrix.Matrix, #(Int, Int)) -> Int) {
   let #(nb_cols, nb_lines) = dimensions(matrix)
   yielder.range(from: 0, to: nb_lines - 1)
   |> yielder.fold(0, fn(acc_line, y) {
@@ -75,12 +48,14 @@ fn fold_over_matrix(matrix: Matrix, count_fn: fn(Matrix, #(Int, Int)) -> Int) {
   })
 }
 
-pub fn pt_1(input: Matrix) {
+pub fn parse(input: String) { matrix.parse_matrix(input) }
+
+pub fn pt_1(input: matrix.Matrix) {
   let xmas = string.to_graphemes("XMAS")
   fold_over_matrix(input, fn(matrix, pos) { count_from(matrix, xmas, pos) })
 }
 
-pub fn pt_2(input: Matrix) {
+pub fn pt_2(input: matrix.Matrix) {
   let mas = string.to_graphemes("MAS")
   fold_over_matrix(input, fn(matrix, x_pos) {
     case
