@@ -32,15 +32,8 @@ fn count_from(matrix: matrix.Matrix, to_find: List(String), starting_pos: matrix
   + find(matrix, starting_pos, to_find, fn(pos) { #(pos.0 - 1, pos.1 - 1) })
 }
 
-fn dimensions(matrix: matrix.Matrix) {
-  let nb_lines = yielder.length(matrix)
-  let assert Ok(first_line) = yielder.at(matrix, 0)
-  let nb_cols = yielder.length(first_line)
-  #(nb_cols, nb_lines)
-}
-
 fn fold_over_matrix(matrix: matrix.Matrix, count_fn: fn(matrix.Matrix, #(Int, Int)) -> Int) {
-  let #(nb_cols, nb_lines) = dimensions(matrix)
+  let #(nb_cols, nb_lines) = matrix.dimensions(matrix)
   yielder.range(from: 0, to: nb_lines - 1)
   |> yielder.fold(0, fn(acc_line, y) {
     yielder.range(from: 0, to: nb_cols - 1)
