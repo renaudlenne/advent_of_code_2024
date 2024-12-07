@@ -1,26 +1,26 @@
+import glearray
 import gleam/list
 import gleam/string
-import gleam/yielder
 
 pub fn parse_matrix(input: String) {
   string.split(input, "\n")
   |> list.map(fn(line) {
     string.to_graphemes(line)
-    |> yielder.from_list()
+    |> glearray.from_list()
   })
-  |> yielder.from_list()
+  |> glearray.from_list()
 }
 
 pub type Matrix =
-yielder.Yielder(yielder.Yielder(String))
+glearray.Array(glearray.Array(String))
 
 pub type Coord =
 #(Int, Int)
 
 pub fn dimensions(matrix: Matrix) {
-  let nb_lines = yielder.length(matrix)
-  let assert Ok(first_line) = yielder.at(matrix, 0)
-  let nb_cols = yielder.length(first_line)
+  let nb_lines = glearray.length(matrix)
+  let assert Ok(first_line) = glearray.get(matrix, 0)
+  let nb_cols = glearray.length(first_line)
   #(nb_cols, nb_lines)
 }
 
@@ -28,8 +28,8 @@ pub fn get_at_coord(matrix: Matrix, pos: Coord) {
   case pos {
     #(a, b) if a < 0 || b < 0 -> Error(Nil)
     _ -> {
-      case yielder.at(matrix, pos.1) {
-        Ok(line) -> yielder.at(line, pos.0)
+      case glearray.get(matrix, pos.1) {
+        Ok(line) -> glearray.get(line, pos.0)
         _ -> Error(Nil)
       }
     }
