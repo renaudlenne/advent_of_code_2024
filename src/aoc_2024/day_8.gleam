@@ -48,10 +48,8 @@ fn find_antinodes(
     [coord1, coord2]
     |> list.fold(acc_n, fn(acc, coord) {
       case coord {
-        #(x, _) if x < 0 -> acc
-        #(x, _) if x >= map_size.0 -> acc
-        #(_, y) if y < 0 -> acc
-        #(_, y) if y >= map_size.1 -> acc
+        #(x, _) if x < 0 || x >= map_size.0 -> acc
+        #(_, y) if y < 0 || y >= map_size.1 -> acc
         _ -> set.insert(acc, coord)
       }
     })
@@ -68,6 +66,54 @@ pub fn pt_1(input: #(matrix.Coord, dict.Dict(String, List(matrix.Coord)))) {
   |> set.size
 }
 
+fn resonate_nodes(
+  resonants: set.Set(matrix.Coord),
+  coord: matrix.Coord,
+  map_size: matrix.Coord,
+  update_fn: fn(matrix.Coord) -> matrix.Coord,
+) {
+  case update_fn(coord) {
+    #(x, _) if x < 0 || x >= map_size.0 -> resonants
+    #(_, y) if y < 0 || y >= map_size.1 -> resonants
+    new_coord ->
+      resonate_nodes(
+        set.insert(resonants, new_coord),
+        new_coord,
+        map_size,
+        update_fn,
+      )
+  }
+}
+
+fn find_resonant_antinodes(
+  nodes: List(matrix.Coord),
+  map_size: matrix.Coord,
+  current_antinodes: set.Set(matrix.Coord),
+) {
+  nodes
+  |> list.combination_pairs()
+  |> list.fold(current_antinodes, fn(acc, pair) {
+    let #(#(x1, y1), #(x2, y2)) = pair
+    let diff_x = x2 - x1
+    let diff_y = y2 - y1
+    resonate_nodes(
+      set.insert(acc, pair.0) |> set.insert(pair.1),
+      pair.0,
+      map_size,
+      fn(coord) { #(coord.0 - diff_x, coord.1 - diff_y) },
+    )
+    |> resonate_nodes(pair.1, map_size, fn(coord) {
+      #(coord.0 + diff_x, coord.1 + diff_y)
+    })
+  })
+}
+
 pub fn pt_2(input: #(matrix.Coord, dict.Dict(String, List(matrix.Coord)))) {
-  todo as "part 2 not implemented"
+  let #(map_size, nodes) = input
+  nodes
+  |> dict.values()
+  |> list.fold(set.new(), fn(acc, node_coords) {
+    find_resonant_antinodes(node_coords, map_size, acc)
+  })
+  |> set.size
 }
