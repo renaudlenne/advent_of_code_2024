@@ -21,7 +21,11 @@ fn find(
   }
 }
 
-fn count_from(matrix: matrix.Matrix, to_find: List(String), starting_pos: matrix.Coord) {
+fn count_from(
+  matrix: matrix.Matrix,
+  to_find: List(String),
+  starting_pos: matrix.Coord,
+) {
   find(matrix, starting_pos, to_find, fn(pos) { #(pos.0, pos.1 - 1) })
   + find(matrix, starting_pos, to_find, fn(pos) { #(pos.0 + 1, pos.1 - 1) })
   + find(matrix, starting_pos, to_find, fn(pos) { #(pos.0 + 1, pos.1) })
@@ -32,7 +36,10 @@ fn count_from(matrix: matrix.Matrix, to_find: List(String), starting_pos: matrix
   + find(matrix, starting_pos, to_find, fn(pos) { #(pos.0 - 1, pos.1 - 1) })
 }
 
-fn fold_over_matrix(matrix: matrix.Matrix, count_fn: fn(matrix.Matrix, #(Int, Int)) -> Int) {
+fn fold_over_matrix(
+  matrix: matrix.Matrix,
+  count_fn: fn(matrix.Matrix, #(Int, Int)) -> Int,
+) {
   let #(nb_cols, nb_lines) = matrix.dimensions(matrix)
   yielder.range(from: 0, to: nb_lines - 1)
   |> yielder.fold(0, fn(acc_line, y) {
@@ -41,7 +48,9 @@ fn fold_over_matrix(matrix: matrix.Matrix, count_fn: fn(matrix.Matrix, #(Int, In
   })
 }
 
-pub fn parse(input: String) { matrix.parse_matrix(input) }
+pub fn parse(input: String) {
+  matrix.parse_matrix(input)
+}
 
 pub fn pt_1(input: matrix.Matrix) {
   let xmas = string.to_graphemes("XMAS")

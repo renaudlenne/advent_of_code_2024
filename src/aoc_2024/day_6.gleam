@@ -1,13 +1,15 @@
-import gleam/string
 import gleam/io
-import gleam/set
-import glearray
 import gleam/iterator
+import gleam/set
+import gleam/string
+import glearray
 import utils/matrix
 
-pub fn parse(input: String) { matrix.parse_matrix(input) }
+pub fn parse(input: String) {
+  matrix.parse_matrix(input)
+}
 
-fn find_guard(map: matrix.Matrix)  {
+fn find_guard(map: matrix.Matrix) {
   map
   |> glearray.iterate
   |> iterator.index()
@@ -18,7 +20,7 @@ fn find_guard(map: matrix.Matrix)  {
     |> iterator.index()
     |> iterator.find_map(fn(elem) {
       case elem.0 {
-        "."|"#" -> Error(Nil)
+        "." | "#" -> Error(Nil)
         _ -> Ok(#(elem.1, y))
       }
     })
@@ -50,7 +52,12 @@ fn move_fn(direction: Direction) {
   }
 }
 
-fn move_guard(map: matrix.Matrix, pos: matrix.Coord, direction: Direction, visited: set.Set(matrix.Coord)) {
+fn move_guard(
+  map: matrix.Matrix,
+  pos: matrix.Coord,
+  direction: Direction,
+  visited: set.Set(matrix.Coord),
+) {
   let move_fn = move_fn(direction)
   let new_pos = move_fn(pos)
   case matrix.get_at_coord(map, new_pos) {
@@ -70,7 +77,13 @@ pub fn pt_1(input: matrix.Matrix) {
   |> set.size
 }
 
-fn will_loop(map: matrix.Matrix, pos: matrix.Coord, block_pos: matrix.Coord, direction: Direction, visited: set.Set(#(matrix.Coord, Direction))) {
+fn will_loop(
+  map: matrix.Matrix,
+  pos: matrix.Coord,
+  block_pos: matrix.Coord,
+  direction: Direction,
+  visited: set.Set(#(matrix.Coord, Direction)),
+) {
   let move = move_fn(direction)
   let new_pos = move(pos)
   //      io.println("(will_loop) Going to "<>string.inspect(new_pos)<>" facing "<>string.inspect(direction))
@@ -78,7 +91,14 @@ fn will_loop(map: matrix.Matrix, pos: matrix.Coord, block_pos: matrix.Coord, dir
     True -> {
       case set.contains(visited, #(pos, direction)) {
         True -> True
-        False -> will_loop(map, pos, block_pos, turn_right(direction), set.insert(visited, #(pos, direction)))
+        False ->
+          will_loop(
+            map,
+            pos,
+            block_pos,
+            turn_right(direction),
+            set.insert(visited, #(pos, direction)),
+          )
       }
     }
     _ -> {
@@ -86,7 +106,14 @@ fn will_loop(map: matrix.Matrix, pos: matrix.Coord, block_pos: matrix.Coord, dir
         Ok("#") -> {
           case set.contains(visited, #(pos, direction)) {
             True -> True
-            False -> will_loop(map, pos, block_pos, turn_right(direction), set.insert(visited, #(pos, direction)))
+            False ->
+              will_loop(
+                map,
+                pos,
+                block_pos,
+                turn_right(direction),
+                set.insert(visited, #(pos, direction)),
+              )
           }
         }
         Ok(_) -> {
@@ -98,24 +125,77 @@ fn will_loop(map: matrix.Matrix, pos: matrix.Coord, block_pos: matrix.Coord, dir
   }
 }
 
-fn find_loops(map: matrix.Matrix, pos: matrix.Coord, direction: Direction, visited: set.Set(matrix.Coord), bumped: set.Set(#(matrix.Coord, Direction)), possible_blocks: set.Set(matrix.Coord)) {
+fn find_loops(
+  map: matrix.Matrix,
+  pos: matrix.Coord,
+  direction: Direction,
+  visited: set.Set(matrix.Coord),
+  bumped: set.Set(#(matrix.Coord, Direction)),
+  possible_blocks: set.Set(matrix.Coord),
+) {
   let move = move_fn(direction)
   let new_pos = move(pos)
-//  io.println("Going to "<>string.inspect(new_pos)<>" facing "<>string.inspect(direction))
+  //  io.println("Going to "<>string.inspect(new_pos)<>" facing "<>string.inspect(direction))
   case matrix.get_at_coord(map, new_pos) {
     Ok("#") -> {
-      find_loops(map, pos, turn_right(direction), visited, set.insert(bumped, #(pos, direction)), possible_blocks)
+      find_loops(
+        map,
+        pos,
+        turn_right(direction),
+        visited,
+        set.insert(bumped, #(pos, direction)),
+        possible_blocks,
+      )
     }
     Ok("^") -> {
-      find_loops(map, new_pos, direction, set.insert(visited, pos), bumped, possible_blocks)
+      find_loops(
+        map,
+        new_pos,
+        direction,
+        set.insert(visited, pos),
+        bumped,
+        possible_blocks,
+      )
     }
     Ok(_) -> {
       case set.contains(visited, new_pos) {
-        True -> find_loops(map, new_pos, direction, set.insert(visited, pos), bumped, possible_blocks)
+        True ->
+          find_loops(
+            map,
+            new_pos,
+            direction,
+            set.insert(visited, pos),
+            bumped,
+            possible_blocks,
+          )
         _ -> {
-          case will_loop(map, pos, new_pos, turn_right(direction), set.insert(bumped, #(pos, direction))) {
-            True -> find_loops(map, new_pos, direction, set.insert(visited, pos), bumped, set.insert(possible_blocks, new_pos))
-            _ -> find_loops(map, new_pos, direction, set.insert(visited, pos), bumped, possible_blocks)
+          case
+            will_loop(
+              map,
+              pos,
+              new_pos,
+              turn_right(direction),
+              set.insert(bumped, #(pos, direction)),
+            )
+          {
+            True ->
+              find_loops(
+                map,
+                new_pos,
+                direction,
+                set.insert(visited, pos),
+                bumped,
+                set.insert(possible_blocks, new_pos),
+              )
+            _ ->
+              find_loops(
+                map,
+                new_pos,
+                direction,
+                set.insert(visited, pos),
+                bumped,
+                possible_blocks,
+              )
           }
         }
       }

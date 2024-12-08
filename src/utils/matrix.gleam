@@ -1,6 +1,6 @@
-import glearray
 import gleam/list
 import gleam/string
+import glearray
 
 pub fn parse_matrix(input: String) {
   string.split(input, "\n")
@@ -12,10 +12,10 @@ pub fn parse_matrix(input: String) {
 }
 
 pub type Matrix =
-glearray.Array(glearray.Array(String))
+  glearray.Array(glearray.Array(String))
 
 pub type Coord =
-#(Int, Int)
+  #(Int, Int)
 
 pub fn dimensions(matrix: Matrix) {
   let nb_lines = glearray.length(matrix)
@@ -36,7 +36,18 @@ pub fn get_at_coord(matrix: Matrix, pos: Coord) {
   }
 }
 
-pub fn go_n(pos: Coord) {#(pos.0, pos.1 - 1)}
-pub fn go_e(pos: Coord) {#(pos.0 + 1, pos.1)}
-pub fn go_s(pos: Coord) {#(pos.0, pos.1 + 1)}
-pub fn go_w(pos: Coord) {#(pos.0 - 1, pos.1)}
+pub fn go_n(pos: Coord) {
+  #(pos.0, pos.1 - 1)
+}
+
+pub fn go_e(pos: Coord) {
+  #(pos.0 + 1, pos.1)
+}
+
+pub fn go_s(pos: Coord) {
+  #(pos.0, pos.1 + 1)
+}
+
+pub fn go_w(pos: Coord) {
+  #(pos.0 - 1, pos.1)
+}

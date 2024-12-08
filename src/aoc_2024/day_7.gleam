@@ -1,6 +1,6 @@
-import gleam/result
 import gleam/int
 import gleam/list
+import gleam/result
 import gleam/string
 
 pub fn parse(input: String) {
@@ -19,11 +19,11 @@ pub fn parse(input: String) {
 
 fn can_match(obj: Int, values: List(Int)) {
   case values {
-    [v, .._] if v > obj -> Error(Nil)
+    [v, ..] if v > obj -> Error(Nil)
     [v] if v == obj -> Ok(obj)
     [v1, v2, ..rest] -> {
-      case can_match(obj, [v1*v2, ..rest]) {
-        Error(_) -> can_match(obj, [v1+v2, ..rest])
+      case can_match(obj, [v1 * v2, ..rest]) {
+        Error(_) -> can_match(obj, [v1 + v2, ..rest])
         res -> res
       }
     }
@@ -49,13 +49,13 @@ fn concat_ints(v1: Int, v2: Int) {
 
 fn can_match_with_concat(obj: Int, values: List(Int)) {
   case values {
-    [v, .._] if v > obj -> Error(Nil)
+    [v, ..] if v > obj -> Error(Nil)
     [v] if v == obj -> Ok(obj)
     [v1, v2, ..rest] -> {
       case can_match_with_concat(obj, [concat_ints(v1, v2), ..rest]) {
         Error(_) -> {
-          case can_match_with_concat(obj, [v1*v2, ..rest]) {
-            Error(_) -> can_match_with_concat(obj, [v1+v2, ..rest])
+          case can_match_with_concat(obj, [v1 * v2, ..rest]) {
+            Error(_) -> can_match_with_concat(obj, [v1 + v2, ..rest])
             res -> res
           }
         }
