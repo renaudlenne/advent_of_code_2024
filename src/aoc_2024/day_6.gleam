@@ -1,7 +1,5 @@
-import gleam/io
-import gleam/iterator
+import gleam/list
 import gleam/set
-import gleam/string
 import glearray
 import utils/matrix
 
@@ -11,14 +9,14 @@ pub fn parse(input: String) {
 
 fn find_guard(map: matrix.Matrix) {
   map
-  |> glearray.iterate
-  |> iterator.index()
-  |> iterator.find_map(fn(indexed_line) {
+  |> glearray.to_list
+  |> list.index_map(fn(val, idx) { #(val, idx) })
+  |> list.find_map(fn(indexed_line) {
     let #(line, y) = indexed_line
     line
-    |> glearray.iterate
-    |> iterator.index()
-    |> iterator.find_map(fn(elem) {
+    |> glearray.to_list
+    |> list.index_map(fn(val, idx) { #(val, idx) })
+    |> list.find_map(fn(elem) {
       case elem.0 {
         "." | "#" -> Error(Nil)
         _ -> Ok(#(elem.1, y))
