@@ -116,9 +116,10 @@ fn move_to_free_block(
 ) {
   case free_blocks {
     [] -> #(block, skipped_blocks |> list.reverse)
-    [free_block, ..rest]
-      if free_block.size > block.size && free_block.position < block.position
-    -> {
+    [free_block, ..] if free_block.position > block.position -> {
+      #(block, skipped_blocks |> list.reverse |> list.append(free_blocks))
+    }
+    [free_block, ..rest] if free_block.size > block.size -> {
       let assert DataBlock(_, size, id) = block
       #(
         DataBlock(position: free_block.position, size: size, id: id),
@@ -133,9 +134,7 @@ fn move_to_free_block(
           ]),
       )
     }
-    [free_block, ..rest]
-      if free_block.size == block.size && free_block.position < block.position
-    -> {
+    [free_block, ..rest] if free_block.size == block.size -> {
       let assert DataBlock(_, size, id) = block
       #(
         DataBlock(position: free_block.position, size: size, id: id),
