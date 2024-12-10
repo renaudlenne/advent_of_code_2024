@@ -55,6 +55,32 @@ pub fn pt_1(input: matrix.IntMatrix) {
   })
 }
 
+fn count_all_paths(map: matrix.IntMatrix, prev_elem: Int, pos: matrix.Coord) {
+  case matrix.get_at_coord(map, pos) {
+    Ok(9) if prev_elem == 8 -> 1
+    Ok(i) if i == prev_elem + 1 -> {
+      matrix.neighbors(pos)
+      |> list.fold(0, fn(score, neighbor) {
+        score + count_all_paths(map, i, neighbor)
+      })
+    }
+    _ -> 0
+  }
+}
+
 pub fn pt_2(input: matrix.IntMatrix) {
-  todo as "part 2 not implemented"
+  input
+  |> glearray.to_list
+  |> list.index_fold(0, fn(acc_l, line, y) {
+    line
+    |> glearray.to_list
+    |> list.index_fold(acc_l, fn(acc, elem, x) {
+      case elem {
+        0 -> {
+          acc + count_all_paths(input, -1, #(x, y))
+        }
+        _ -> acc
+      }
+    })
+  })
 }
