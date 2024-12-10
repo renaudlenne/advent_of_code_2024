@@ -152,9 +152,18 @@ pub fn pt_2(input: #(List(Block), List(Block))) {
   data_blocks
   |> list.fold(#([], initial_free_blocks), fn(acc, block) {
     let #(data_blocks, free_blocks) = acc
-    let #(new_block, new_free_blocks) =
-      move_to_free_block(block, free_blocks, [])
-    #([new_block, ..data_blocks], new_free_blocks)
+    case free_blocks {
+      [] -> acc
+      [first_free, ..] if first_free.position > block.position -> #(
+        [block, ..data_blocks],
+        free_blocks,
+      )
+      _ -> {
+        let #(new_block, new_free_blocks) =
+          move_to_free_block(block, free_blocks, [])
+        #([new_block, ..data_blocks], new_free_blocks)
+      }
+    }
   })
   |> pair.first
   |> list.map(checksum)
