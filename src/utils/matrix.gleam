@@ -1,30 +1,42 @@
+import gleam/function
 import gleam/list
 import gleam/string
 import glearray
 
 pub fn parse_matrix(input: String) {
+  parse_matrix_and_map(input, function.identity)
+}
+
+pub fn parse_matrix_and_map(input: String, transform: fn(String) -> a) {
   string.split(input, "\n")
   |> list.map(fn(line) {
     string.to_graphemes(line)
+    |> list.map(transform)
     |> glearray.from_list()
   })
   |> glearray.from_list()
 }
 
 pub type Matrix =
-  glearray.Array(glearray.Array(String))
+  GenericMatrix(String)
+
+pub type IntMatrix =
+  GenericMatrix(Int)
+
+pub type GenericMatrix(a) =
+  glearray.Array(glearray.Array(a))
 
 pub type Coord =
   #(Int, Int)
 
-pub fn dimensions(matrix: Matrix) {
+pub fn dimensions(matrix: GenericMatrix(a)) {
   let nb_lines = glearray.length(matrix)
   let assert Ok(first_line) = glearray.get(matrix, 0)
   let nb_cols = glearray.length(first_line)
   #(nb_cols, nb_lines)
 }
 
-pub fn get_at_coord(matrix: Matrix, pos: Coord) {
+pub fn get_at_coord(matrix: GenericMatrix(a), pos: Coord) {
   case pos {
     #(a, b) if a < 0 || b < 0 -> Error(Nil)
     _ -> {
@@ -50,4 +62,8 @@ pub fn go_s(pos: Coord) {
 
 pub fn go_w(pos: Coord) {
   #(pos.0 - 1, pos.1)
+}
+
+pub fn neighbors(pos: Coord) {
+  [go_n(pos), go_e(pos), go_s(pos), go_w(pos)]
 }
