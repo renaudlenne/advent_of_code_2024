@@ -15,12 +15,13 @@ version = "1.0.0"
 [dependencies]
 gleam_stdlib = ">= 0.34.0 and < 2.0.0"
 argv = ">= 1.0.2 and < 2.0.0"
-gladvent = ">= 2.1.0 and < 3.0.0"
+gladvent = { path = "../gladvent" }
 envoy = ">= 1.0.2 and < 2.0.0"
 gleam_regexp = ">= 1.0.0 and < 2.0.0"
 gleamy_bench = ">= 0.5.0 and < 1.0.0"
 gleam_yielder = ">= 1.1.0 and < 2.0.0"
 glearray = ">= 1.0.0 and < 2.0.0"
+glerm = { path = "../glerm" }
 
 [gladvent.2024]
 1 = { pt_1 = 1110981, pt_2 = 24869388 }

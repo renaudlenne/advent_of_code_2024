@@ -1,7 +1,12 @@
+import gleam/erlang/process
+import gleam/function
 import gleam/int
 import gleam/list
 import gleam/option
+import gleam/otp/actor
+import gleam/pair
 import gleam/regexp
+import glerm.{Character, Control, Key}
 import utils/matrix
 
 pub type Robot {
@@ -31,6 +36,7 @@ pub fn parse(input: String) {
 
 const nb_cols = 101
 const nb_lines = 103
+const offset = 7600
 
 fn move_robots(map: List(Robot)) {
   map
@@ -72,6 +78,62 @@ pub fn pt_1(input: List(Robot)) {
   |> count_by_quadrants()
 }
 
+fn draw_robots(input: #(List(Robot), Int)) {
+  let #(robots, frame) = input
+  glerm.draw([#(0,0,int.to_string(frame) <> "s")])
+  robots
+  |> list.map(fn (robot) {
+    #(robot.x, robot.y+1, "#")
+  })
+  |> glerm.draw()
+  #(robots, frame+1)
+}
+
 pub fn pt_2(input: List(Robot)) {
-  todo as "part 2 not implemented"
+  let subject = process.new_subject()
+
+  let selector =
+    process.new_selector()
+    |> process.selecting(subject, function.identity)
+
+  // Create a new screen for our application
+  let assert Ok(_) = glerm.enter_alternate_screen()
+  // Enable raw mode to allow capturing all input, and free-form
+  // output
+  let assert Ok(_) = glerm.enable_raw_mode()
+  // Also grab mouse events
+  let assert Ok(_) = glerm.enable_mouse_capture()
+
+  // Clear the terminal screen
+  glerm.clear()
+  // Place the cursor at the top-left
+  glerm.move_to(0, 0)
+
+  // Start the terminal NIF to begin receiving events
+  let assert Ok(_subj) =
+    glerm.start_listener(#(move_n_times(input, offset), offset), fn(msg, state) {
+      case msg {
+        // We need to provide some way for a user to quit the application.
+        Key(Character("c"), option.Some(Control)) -> {
+          // Turn off some of the things we set above
+          let assert Ok(_) = glerm.disable_raw_mode()
+          let assert Ok(_) = glerm.disable_mouse_capture()
+          // Tell our subject that we are done, which will unblock the
+          // `select_forever` below
+          process.send(subject, Nil)
+          actor.Stop(process.Normal)
+        }
+        _ -> {
+          glerm.clear()
+          actor.continue(
+            state
+            |> draw_robots()
+            |> pair.map_first(move_robots)
+          )
+        }
+      }
+    })
+
+  // Block until we receive the exit signal from the listener
+  process.select_forever(selector)
 }
