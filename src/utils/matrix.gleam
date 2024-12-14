@@ -48,6 +48,13 @@ pub fn get_at_coord(matrix: GenericMatrix(a), pos: Coord) {
   }
 }
 
+pub type Direction {
+  North
+  East
+  South
+  West
+}
+
 pub fn go_n(pos: Coord) {
   #(pos.0, pos.1 - 1)
 }
@@ -66,4 +73,42 @@ pub fn go_w(pos: Coord) {
 
 pub fn neighbors(pos: Coord) {
   [go_n(pos), go_e(pos), go_s(pos), go_w(pos)]
+}
+
+pub fn neighbors_with_dir(pos: Coord) {
+  [
+    #(go_n(pos), North),
+    #(go_e(pos), East),
+    #(go_s(pos), South),
+    #(go_w(pos), West),
+  ]
+}
+
+pub fn turn_right(direction: Direction) {
+  case direction {
+    North -> East
+    East -> South
+    South -> West
+    West -> North
+  }
+}
+
+pub fn direction(move: #(Coord, Coord)) {
+  let #(from, to) = move
+  case to {
+    #(x, y) if x == from.0 && y == from.1 - 1 -> Ok(North)
+    #(x, y) if x == from.0 + 1 && y == from.1 -> Ok(East)
+    #(x, y) if x == from.0 && y == from.1 + 1 -> Ok(South)
+    #(x, y) if x == from.0 - 1 && y == from.1 -> Ok(West)
+    _ -> Error(Nil)
+  }
+}
+
+pub fn apply(pos: Coord, direction: Direction) {
+  case direction {
+    North -> go_n(pos)
+    East -> go_e(pos)
+    South -> go_s(pos)
+    West -> go_w(pos)
+  }
 }

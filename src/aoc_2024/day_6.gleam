@@ -25,42 +25,26 @@ fn find_guard(map: matrix.Matrix) {
   })
 }
 
-type Direction {
-  North
-  East
-  South
-  West
-}
-
-fn turn_right(direction: Direction) {
+fn move_fn(direction: matrix.Direction) {
   case direction {
-    North -> East
-    East -> South
-    South -> West
-    West -> North
-  }
-}
-
-fn move_fn(direction: Direction) {
-  case direction {
-    North -> matrix.go_n
-    East -> matrix.go_e
-    South -> matrix.go_s
-    West -> matrix.go_w
+    matrix.North -> matrix.go_n
+    matrix.East -> matrix.go_e
+    matrix.South -> matrix.go_s
+    matrix.West -> matrix.go_w
   }
 }
 
 fn move_guard(
   map: matrix.Matrix,
   pos: matrix.Coord,
-  direction: Direction,
+  direction: matrix.Direction,
   visited: set.Set(matrix.Coord),
 ) {
   let move_fn = move_fn(direction)
   let new_pos = move_fn(pos)
   case matrix.get_at_coord(map, new_pos) {
     Ok("#") -> {
-      move_guard(map, pos, turn_right(direction), visited)
+      move_guard(map, pos, matrix.turn_right(direction), visited)
     }
     Ok(_) -> {
       move_guard(map, new_pos, direction, set.insert(visited, pos))
@@ -71,7 +55,7 @@ fn move_guard(
 
 pub fn pt_1(input: matrix.Matrix) {
   let assert Ok(initial_pos) = find_guard(input)
-  move_guard(input, initial_pos, North, set.new())
+  move_guard(input, initial_pos, matrix.North, set.new())
   |> set.size
 }
 
@@ -79,8 +63,8 @@ fn will_loop(
   map: matrix.Matrix,
   pos: matrix.Coord,
   block_pos: matrix.Coord,
-  direction: Direction,
-  visited: set.Set(#(matrix.Coord, Direction)),
+  direction: matrix.Direction,
+  visited: set.Set(#(matrix.Coord, matrix.Direction)),
 ) {
   let move = move_fn(direction)
   let new_pos = move(pos)
@@ -94,7 +78,7 @@ fn will_loop(
             map,
             pos,
             block_pos,
-            turn_right(direction),
+            matrix.turn_right(direction),
             set.insert(visited, #(pos, direction)),
           )
       }
@@ -109,7 +93,7 @@ fn will_loop(
                 map,
                 pos,
                 block_pos,
-                turn_right(direction),
+                matrix.turn_right(direction),
                 set.insert(visited, #(pos, direction)),
               )
           }
@@ -126,9 +110,9 @@ fn will_loop(
 fn find_loops(
   map: matrix.Matrix,
   pos: matrix.Coord,
-  direction: Direction,
+  direction: matrix.Direction,
   visited: set.Set(matrix.Coord),
-  bumped: set.Set(#(matrix.Coord, Direction)),
+  bumped: set.Set(#(matrix.Coord, matrix.Direction)),
   possible_blocks: set.Set(matrix.Coord),
 ) {
   let move = move_fn(direction)
@@ -139,7 +123,7 @@ fn find_loops(
       find_loops(
         map,
         pos,
-        turn_right(direction),
+        matrix.turn_right(direction),
         visited,
         set.insert(bumped, #(pos, direction)),
         possible_blocks,
@@ -172,7 +156,7 @@ fn find_loops(
               map,
               pos,
               new_pos,
-              turn_right(direction),
+              matrix.turn_right(direction),
               set.insert(bumped, #(pos, direction)),
             )
           {
@@ -204,5 +188,5 @@ fn find_loops(
 
 pub fn pt_2(input: matrix.Matrix) {
   let assert Ok(initial_pos) = find_guard(input)
-  find_loops(input, initial_pos, North, set.new(), set.new(), set.new())
+  find_loops(input, initial_pos, matrix.North, set.new(), set.new(), set.new())
 }
